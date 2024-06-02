@@ -45,7 +45,7 @@ public class CustomerManager {
 	
 	// 모든 고객 정보 출력
 		public static void printCustomer() {
-			System.out.println("ID\t\tPW\t이름\t연락처\t\t주소\t\t나이\t등급\t누적결제금액\t마일리지");
+			System.out.println("ID\tPW\t이름\t연락처\t\t주소\t\t나이\t등급\t누적결제금액\t마일리지");
 			for (int i = 0; i < Main.userList.size(); i++) {
 				System.out.print(Main.userList.get(i).getCustomerId() + " ");
 				System.out.print(Main.userList.get(i).getPw() + "\t");

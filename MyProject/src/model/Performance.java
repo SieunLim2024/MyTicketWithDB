@@ -21,38 +21,7 @@ public class Performance implements Comparable<Performance> {
 	public Performance() {
 		super();
 	}
-//	public Performance(String performanceID, String performanceName, String genre, String dayOfPerformance, String venue,
-//			int limitAge, int totalSeats, int soldSeats, int ticketPrice,int yseats) {
-//		super();
-//		this.performanceID = performanceID;
-//		this.performanceName = performanceName;
-//		this.genre = genre;
-//		this.dayOfPerformance = dayOfPerformance;
-//		this.venue = venue;
-//		this.limitAge = limitAge;
-//		this.totalSeats = totalSeats;
-//		this.soldSeats = soldSeats;
-//		this.ticketPrice = ticketPrice;
-//		this.seats=seats;
-//		this.xseats=totalSeats/yseats;
-//		calSeats();
-//	}
-//	public Performance(String performanceID, String performanceName, String genre, String dayOfPerformance, String venue,
-//			int limitAge, int totalSeats, int soldSeats, int ticketPrice, String[][] readSeat, int yseats, int xseats) {
-//		super();
-//		this.performanceID = performanceID;
-//		this.performanceName = performanceName;
-//		this.genre = genre;
-//		this.dayOfPerformance = dayOfPerformance;
-//		this.venue = venue;
-//		this.limitAge = limitAge;
-//		this.totalSeats = totalSeats;
-//		this.soldSeats = soldSeats;
-//		this.ticketPrice = ticketPrice;
-//		this.seats = readSeat;
-//		this.yseats=yseats;
-//		this.xseats=xseats;
-//	}
+
 	public void calSeats() {
 		seats= new String[yseats][xseats];
 	}

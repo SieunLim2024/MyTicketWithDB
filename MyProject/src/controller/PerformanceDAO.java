@@ -33,52 +33,34 @@ public class PerformanceDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				if (cstmt != null) {
-					cstmt.close();
-				}
-				if (con != null) {
-					con.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBUtil.closeResources(cstmt, con);
 		}
 		setPerformanceToList();
 
 	}
-	//좌석 판매 수 업데이트
-	public static void updatePerformance(String performanceId, int soldSeats) {
-		Connection con = null;
-		CallableStatement cstmt = null;
-		try {
-			String sql = "CALL PERFORMANCETBL_UPDATE_SOLD(?,?)";
-			con = controller.DBUtil.makeConnection();
-			cstmt = con.prepareCall(sql);
-			cstmt.setInt(1, soldSeats);
-			cstmt.setString(2, performanceId);
-			int value = cstmt.executeUpdate();
-			if (value == 0) {
-				System.out.println(performanceId + "좌석 판매 정보 업데이트 완료");
-			} else {
-				System.out.println(performanceId + "좌석 판매 정보 업데이트 실패");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (cstmt != null) {
-					cstmt.close();
-				}
-				if (con != null) {
-					con.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		setPerformanceToList();
-	}
+//	//좌석 판매 수 업데이트
+//	public static void updatePerformance(String performanceId, int soldSeats) {
+//		Connection con = null;
+//		CallableStatement cstmt = null;
+//		try {
+//			String sql = "CALL PERFORMANCETBL_UPDATE_SOLD(?,?)";
+//			con = controller.DBUtil.makeConnection();
+//			cstmt = con.prepareCall(sql);
+//			cstmt.setInt(1, soldSeats);
+//			cstmt.setString(2, performanceId);
+//			int value = cstmt.executeUpdate();
+//			if (value == 0) {
+//				System.out.println(performanceId + "좌석 판매 정보 업데이트 완료");
+//			} else {
+//				System.out.println(performanceId + "좌석 판매 정보 업데이트 실패");
+//			}
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		} finally {
+//			DBUtil.closeResources(cstmt,con);
+//		}
+//		setPerformanceToList();
+//	}
 
 	// 공연 추가
 	public static void addPerformance() {
@@ -257,17 +239,7 @@ public class PerformanceDAO {
 				} catch (SQLException e) {
 					e.printStackTrace();
 				} finally {
-					try {
-
-						if (cstmt != null) {
-							cstmt.close();
-						}
-						if (con != null) {
-							con.close();
-						}
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
+					DBUtil.closeResources(cstmt, con);
 				}
 				Admin.performanceList.clear();// 변경 사항 있으므로 초기화
 				setPerformanceToList();// 다시 저장
@@ -334,16 +306,7 @@ public class PerformanceDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				if (cstmt != null) {
-					cstmt.close();
-				}
-				if (con != null) {
-					con.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBUtil.closeResources(cstmt, con);
 		}
 		setPerformanceToList();
 
@@ -366,19 +329,7 @@ public class PerformanceDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (cstmt != null) {
-					cstmt.close();
-				}
-				if (con != null) {
-					con.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBUtil.closeResources(cstmt, rs, con);
 		}
 		return cnt;
 	}
@@ -402,19 +353,7 @@ public class PerformanceDAO {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} finally {
-				try {
-					if (rs != null) {
-						rs.close();
-					}
-					if (cstmt != null) {
-						cstmt.close();
-					}
-					if (con != null) {
-						con.close();
-					}
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+				DBUtil.closeResources(cstmt, rs, con);
 			}
 			return cnt;
 		}
@@ -422,16 +361,17 @@ public class PerformanceDAO {
 		// DB에 저장된 내용 리스트로...
 		public static void setPerformanceToList() {
 			Admin.performanceList.clear();
-			String sql = "SELECT * FROM performancetbl";
+			String sql = "CALL PERFORMANCETBL_SELECT(?)";
 			Connection con = null;
-			PreparedStatement pstmt = null;
+			CallableStatement cstmt = null;
 			ResultSet rs = null;
 
 			try {
 				con = controller.DBUtil.makeConnection();
-				pstmt = con.prepareStatement(sql);
-				rs = pstmt.executeQuery();
-
+				cstmt = con.prepareCall(sql);
+				cstmt.registerOutParameter(1, Types.REF_CURSOR);
+				cstmt.execute();
+				rs=(ResultSet)cstmt.getObject(1);
 				while (rs.next()) {
 					Performance p = new Performance();
 					p.setPerformanceID(rs.getString("performanceid"));
@@ -464,19 +404,7 @@ public class PerformanceDAO {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} finally {
-				try {
-					if (rs != null) {
-						rs.close();
-					}
-					if (pstmt != null) {
-						pstmt.close();
-					}
-					if (con != null) {
-						con.close();
-					}
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+				DBUtil.closeResources(cstmt, rs, con);
 			}
 		}// end of setPerformanceToList
 

@@ -5,27 +5,30 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 
+import main.Main;
 import model.CartItem;
 import model.Customer;
 
 public class PaymentDAO {
 
 	// db에서 로그인 한 사람의 구매 내역만 뽑아서 list에 넣음
-	public static void setPaymaentToList(ArrayList<CartItem> totalPaymentList, Customer nowUser) {
-		totalPaymentList.clear();
+	public static void setPaymaentToList(ArrayList<CartItem> paymentList, Customer nowUser) {
+		paymentList.clear();
+		String sql = "CALL PAYMENTTBL_SELECT(?,?)";
 		Connection con = null;
-		PreparedStatement pstmt = null;
+		CallableStatement cstmt = null;
 		ResultSet rs = null;
 
 		try {
-			String sql = "SELECT * FROM paymenttbl WHERE customerid=?";
 			con = controller.DBUtil.makeConnection();
-			pstmt = con.prepareStatement(sql);
-			pstmt.setString(1, nowUser.getCustomerId());
-			rs = pstmt.executeQuery();
-
+			cstmt = con.prepareCall(sql);
+			cstmt.setString(1, nowUser.getCustomerId());
+			cstmt.registerOutParameter(2, Types.REF_CURSOR);
+			cstmt.execute();
+			rs=(ResultSet)cstmt.getObject(2);
 			while (rs.next()) {
 				CartItem ci = new CartItem();
 				ci.setCustomerID(rs.getString("customerID"));
@@ -35,24 +38,12 @@ public class PaymentDAO {
 				ci.setTotalPrice(rs.getInt("totalPrice"));
 				ci.setSeatNum(rs.getString("seatNum"));
 
-				totalPaymentList.add(ci);
+				paymentList.add(ci);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (pstmt != null) {
-					pstmt.close();
-				}
-				if (con != null) {
-					con.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBUtil.closeResources(cstmt, rs, con);
 		}
 	}// end of setPaymentToList
 	
@@ -68,7 +59,12 @@ public class PaymentDAO {
 				cstmt.setString(2, main.Main.cart.cartItem.get(i).getPerformanceId());
 				cstmt.setString(3, main.Main.cart.cartItem.get(i).getPerformanceName());
 				cstmt.setInt(4, main.Main.cart.cartItem.get(i).getQuantity());
-				cstmt.setInt(5, main.Main.cart.cartItem.get(i).getTotalPrice());
+				
+				int totalPrice=main.Main.cart.cartItem.get(i).getTotalPrice();
+				if (Main.nowUser.getGrade().equals("VIP")) {
+					totalPrice *= 0.99;// vip면 할인 해줌
+				}
+				cstmt.setInt(5, totalPrice);
 				cstmt.setString(6, main.Main.cart.cartItem.get(i).getSeatNum());
 				
 				int value = cstmt.executeUpdate();
@@ -82,21 +78,35 @@ public class PaymentDAO {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} finally {
-				try {
-					
-					if (cstmt != null) {
-						cstmt.close();
-					}
-					if (con != null) {
-						con.close();
-					}
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+				DBUtil.closeResources(cstmt, con);
 			}
 			
 		}
-		controller.PaymentDAO.setPaymaentToList(main.Main.totalPaymentList, main.Main.nowUser);
+		setPaymaentToList(main.Main.paymentList, main.Main.nowUser);
 	}
+
+	public static void deleteUserPayment(String inputID) {
+		Connection con = null;
+		CallableStatement cstmt = null;
+		try {
+			String sql = "CALL PAYMENTTBL_DELETE_USER(?)";
+			con = controller.DBUtil.makeConnection();
+			cstmt = con.prepareCall(sql);
+			cstmt.setString(1, inputID);
+			int value = cstmt.executeUpdate();
+			if (value == 0) {
+				System.out.println(inputID + "회원 구매 정보 삭제 완료");
+			} else {
+				System.out.println(inputID + "회원 구매 정보 삭제 실패");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBUtil.closeResources(cstmt, con);
+		}
+//		setPaymaentToList(main.Main.totalPaymentList, main.Main.nowUser);
+	}
+		
+	
 
 }

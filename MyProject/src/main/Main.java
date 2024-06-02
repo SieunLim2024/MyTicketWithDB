@@ -30,7 +30,7 @@ public class Main {
 	public static Scanner sc = new Scanner(System.in);
 	public static ArrayList<Customer> userList = new ArrayList<Customer>();
 	public static ArrayList<CartItem> paymentList = new ArrayList<>();
-	public static ArrayList<CartItem> totalPaymentList = new ArrayList<>();
+//	public static ArrayList<CartItem> totalPaymentList = new ArrayList<>();
 	public static ArrayList<CartItem> totalCartList = new ArrayList<>();
 	public static Cart cart = new Cart();
 	public static Cart payment = new Cart();
@@ -45,9 +45,9 @@ public class Main {
 		// 로그인
 		login();
 		if (checkLogin) { // 로그인 성공시에 메인 메뉴로
-			controller.PaymentDAO.setPaymaentToList(totalPaymentList, nowUser);
+			controller.PaymentDAO.setPaymaentToList(paymentList, nowUser);
 			// 로그인 한 고객의 카트 정보와 구매 정보 파일에서 불러옴
-			controller.CartDAO.setCartToList(nowUser);
+			controller.CartDAO.setCartToList(nowUser.getCustomerId());
 			// 메인 메뉴로
 			mainMenu(nowUser);
 		}
@@ -108,7 +108,7 @@ public class Main {
 				view.MainMypageViewer.MainMypageViewer();
 				
 				System.out.println(nowUser); // 회원 정보 출력
-				controller.CartManager.printTotalPayment(totalPaymentList, nowUser);// 누적 구매 내역 출력
+				controller.CartManager.printTotalPayment(paymentList, nowUser);// 누적 구매 내역 출력
 				break;
 			case MainMenuChoice.CARTPAGE:
 				cart();
@@ -224,7 +224,7 @@ public class Main {
 	private static void cart() {
 		boolean quit = false;
 		while (!quit) {
-			cart.printCart();
+			controller.CartManager.printCart();
 			view.CartPageMenuViewer.CartPageMenuViewer();
 			System.out.print("메뉴 선택>> ");
 			String input = Main.sc.nextLine().replaceAll("[^1-4]", "0");// 1~4 이외는 0, 메뉴에 0 없어야함
@@ -244,12 +244,7 @@ public class Main {
 				}
 				break;
 			case view.CartPageMenuChoice.ALLREMOVE:
-				try {
-					controller.CartManager.cartClear(nowUser);
-				} catch (CartException e) {
-					System.out.println(e.getMessage());
-
-				}
+					controller.CartManager.cartClear(nowUser.getCustomerId());
 				break;
 			case view.CartPageMenuChoice.BUY:
 				try {
@@ -295,7 +290,7 @@ public class Main {
 					controller.CustomerManager.printCustomer();
 					break;
 				case view.AdminMenuChoice.REMOVEUSER:
-					controller.CustomerDAO.deleteUser();
+						controller.CustomerDAO.deleteUser();
 					break;
 				case view.AdminMenuChoice.EXIT:
 					quit = true;
@@ -306,32 +301,4 @@ public class Main {
 			} // end of while
 		}// end of admiMenu
 	
-//	// 공연 파일 읽어 공연 개수 계산 함
-//	private static int countPerformance() {
-//		try {
-//			FileReader fr = new FileReader("performance.txt");
-//			BufferedReader reader = new BufferedReader(fr);
-//			String str;
-//			int num = 0; // 공연 개수
-//			while ((str = reader.readLine()) != null) {
-//				if (str.contains("pID")) {
-//					++num;
-//				}
-//			}
-//			reader.close();
-//			fr.close();
-//			return num;
-//		} catch (Exception e) {
-//			System.out.println(e);
-//		}
-//		return 0;
-//	}
-	
-//	// 현재 로그인 한 유저의 카트정보를 totalCartList에 넣어준다.
-//	private static void addUserCartToTotal() {
-//		for (int i = 0; i < cart.cartItem.size(); i++) {
-//			totalCartList.add(cart.cartItem.get(i));
-//		}
-//
-//	}
 }

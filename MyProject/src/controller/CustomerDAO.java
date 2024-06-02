@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 
+import exception.CartException;
 import main.Main;
 import model.Admin;
 import model.Customer;
@@ -16,15 +17,17 @@ public class CustomerDAO {
 	// 유저를 리스트로
 	public static void setUserToList(ArrayList<Customer> userList) {
 		userList.clear();
-		String sql = "SELECT * FROM USERTBL";
+		String sql = "CALL USERTBL_SELECT(?)";
 		Connection con = null;
-		PreparedStatement pstmt = null;
+		CallableStatement cstmt = null;
 		ResultSet rs = null;
 
 		try {
 			con = controller.DBUtil.makeConnection();
-			pstmt = con.prepareStatement(sql);
-			rs = pstmt.executeQuery();
+			cstmt = con.prepareCall(sql);
+			cstmt.registerOutParameter(1, Types.REF_CURSOR);
+			cstmt.execute();
+			rs=(ResultSet)cstmt.getObject(1);
 			while (rs.next()) {
 				Customer cus = new Customer();
 				cus.setCustomerId(rs.getString("customerid"));
@@ -35,26 +38,14 @@ public class CustomerDAO {
 				cus.setAge(rs.getInt("age"));
 				cus.setGrade(rs.getString("grade"));
 				cus.setAccumulatedPayment(rs.getInt("accumulatedpayment"));
-				cus.setAge(rs.getInt("mileage"));
+				cus.setMileage(rs.getInt("mileage"));
 
 				userList.add(cus);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (pstmt != null) {
-					pstmt.close();
-				}
-				if (con != null) {
-					con.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBUtil.closeResources(cstmt, rs, con);
 		}
 	}
 
@@ -89,7 +80,7 @@ public class CustomerDAO {
 				while (!ageFlag) {
 					System.out.print("나이 (숫자 만): ");
 					String input = main.Main.sc.nextLine().replaceAll("[^0-9]", "");// 숫자 이외 공백 처리
-
+					System.out.println(input);
 					if (input.length() == 0) {// 숫자를 한번도 입력하지 않으면
 						input = "0";// null 방지 (사실 필요 없으니 보험삼아)
 						System.out.println("숫자만 입력해주세요.");
@@ -137,17 +128,7 @@ public class CustomerDAO {
 				} catch (SQLException e) {
 					e.printStackTrace();
 				} finally {
-					try {
-
-						if (cstmt != null) {
-							cstmt.close();
-						}
-						if (con != null) {
-							con.close();
-						}
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
+					DBUtil.closeResources(cstmt, con);
 				}
 				main.Main.userList.clear();
 				controller.CustomerDAO.setUserToList(main.Main.userList);
@@ -159,7 +140,7 @@ public class CustomerDAO {
 	}// end of joinMembership
 
 	// 회원 삭제
-	public static void deleteUser() {
+	public static void deleteUser(){
 		if (getCountUser() == 0) {
 			System.out.println("DB에 저장된 고객이 없습니다.");
 			return;
@@ -182,9 +163,14 @@ public class CustomerDAO {
 				System.out.println("해당 계정을 찾지 못했습니다.");
 			}
 		} // end of while
-
+		controller.CartManager.cartClear(inputID); 
+		
+//		controller.CartDAO.deleteUserCart(inputID);
+//		controller.PaymentDAO.deleteUserPayment(inputID);//프로시저 테스트
+		
+		
 		Connection con = null;
-		PreparedStatement cstmt = null;
+		CallableStatement cstmt = null;
 		try {
 			String sql = "CALL USERTBL_DELETE(?)";
 			con = controller.DBUtil.makeConnection();
@@ -199,16 +185,7 @@ public class CustomerDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				if (cstmt != null) {
-					cstmt.close();
-				}
-				if (con != null) {
-					con.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBUtil.closeResources(cstmt, con);
 		}
 		controller.CustomerDAO.setUserToList(Main.userList);
 	}
@@ -232,19 +209,7 @@ public class CustomerDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (cstmt != null) {
-					cstmt.close();
-				}
-				if (con != null) {
-					con.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBUtil.closeResources(cstmt, rs, con);
 		}
 		return cnt;
 	}
@@ -266,19 +231,7 @@ public class CustomerDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (cstmt != null) {
-					cstmt.close();
-				}
-				if (con != null) {
-					con.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBUtil.closeResources(cstmt, rs, con);
 		}
 		return cnt;
 	}

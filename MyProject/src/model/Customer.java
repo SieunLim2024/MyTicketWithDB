@@ -107,18 +107,7 @@ public class Customer {
 	public void setMileage(int mileage) {
 		this.mileage = mileage;
 	}
-//	public int getBuyNum() {
-//		return buyNum;
-//	}
-//	public void setBuyNum(int buyNum) {
-//		this.buyNum = buyNum;
-//	}
-//	public int getCartNum() {
-//		return cartNum;
-//	}
-//	public void setCartNum(int cartNum) {
-//		this.cartNum = cartNum;
-//	}
+
 	@Override
 	public String toString() {
 		return customerId +"\t"+customerName +"\t"+phone +"\t"+ address+"\t"+ age +"\t"+ grade +"\t"+ accumulatedPayment +"\t\t"+ mileage;
