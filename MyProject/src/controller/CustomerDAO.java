@@ -80,7 +80,6 @@ public class CustomerDAO {
 				while (!ageFlag) {
 					System.out.print("나이 (숫자 만): ");
 					String input = main.Main.sc.nextLine().replaceAll("[^0-9]", "");// 숫자 이외 공백 처리
-					System.out.println(input);
 					if (input.length() == 0) {// 숫자를 한번도 입력하지 않으면
 						input = "0";// null 방지 (사실 필요 없으니 보험삼아)
 						System.out.println("숫자만 입력해주세요.");

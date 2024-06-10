@@ -69,7 +69,7 @@ public class PaymentDAO {
 				
 				int value = cstmt.executeUpdate();
 				
-				if (value == 1) {
+				if (value == 0) {
 					System.out.println(main.Main.cart.cartItem.get(i).getPerformanceName() + " 등록완료");
 				} else {
 					System.out.println(main.Main.cart.cartItem.get(i).getPerformanceName() + " 등록 실패");

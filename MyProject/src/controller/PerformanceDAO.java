@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -303,6 +304,9 @@ public class PerformanceDAO {
 			} else {
 				System.out.println(inputID + "공연 삭제 실패");
 			}
+		
+		} catch (SQLIntegrityConstraintViolationException e) {
+			System.out.println("이미 선점된 좌석이 있는 공연은 삭제가 불가합니다.");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
